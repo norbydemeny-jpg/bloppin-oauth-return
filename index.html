@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+  <title>Terug naar Bloppin · lokale proef</title>
+</head>
+<body>
+  <p>Je wordt teruggestuurd naar de lokale Bloppin-proef op deze computer.</p>
+  <p id="error" hidden>Deze terugkeer is ongeldig. Open Bloppin en probeer de koppeling opnieuw.</p>
+  <script>
+    (() => {
+      // Local founder pilot only. No API proxy, credentials or arbitrary destinations.
+      const source = new URL(window.location.href);
+      const values = source.searchParams.getAll('session_uri');
+      window.history.replaceState(null, '', source.pathname);
+      if (values.length !== 1 || !values[0] || values[0].length > 4096) {
+        document.getElementById('error').hidden = false;
+        return;
+      }
+      const target = new URL('http://127.0.0.1:5201/workspace?section=apps');
+      // Fragment isn't sent to Vite/HTTP logs or as a Referer. Bloppin redeems it server-side.
+      target.hash = new URLSearchParams({ app_session_uri: values[0] }).toString();
+      window.location.replace(target.toString());
+    })();
+  </script>
+</body>
+</html>
